@@ -1,0 +1,216 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "104.com.tw Job Search API",
+    "description": "Search jobs and companies on Taiwan's largest job platform (104.com.tw). Use this to find job listings, company profiles, and career opportunities in Taiwan.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://104-mcp.vercel.app",
+      "description": "Production"
+    }
+  ],
+  "paths": {
+    "/api/search-jobs": {
+      "get": {
+        "operationId": "searchJobs",
+        "summary": "Search job listings on 104.com.tw",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "description": "Search keyword in English or Chinese (e.g. 'software engineer', '軟體工程師')",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "area",
+            "in": "query",
+            "description": "Location code. Common: 6001001000=台北市, 6001002000=新北市, 6001005000=台中市, 6001008000=高雄市",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "ro",
+            "in": "query",
+            "description": "Job type: 0=full-time (default), 1=part-time",
+            "schema": { "type": "integer", "enum": [0, 1] }
+          },
+          {
+            "name": "remoteWork",
+            "in": "query",
+            "description": "Remote work: 1=partial remote, 2=fully remote",
+            "schema": { "type": "integer", "enum": [1, 2] }
+          },
+          {
+            "name": "edu",
+            "in": "query",
+            "description": "Education level: 1=高中以下, 2=高中, 3=專科, 4=大學, 5=碩士, 6=博士",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "s9",
+            "in": "query",
+            "description": "Experience (comma-separated): 1=應屆畢業, 2=1年以下, 3=1-3年, 4=3-5年, 5=5-10年, 6=10年以上",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "description": "Sort order: 15=newest (default), 1=relevance",
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": { "type": "integer", "minimum": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job listings with pagination",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "jobNo": { "type": "string" },
+                          "jobName": { "type": "string" },
+                          "custName": { "type": "string" },
+                          "salaryLow": { "type": "number" },
+                          "salaryHigh": { "type": "number" },
+                          "jobAddrNoDesc": { "type": "string" },
+                          "appearDate": { "type": "string" },
+                          "applyCnt": { "type": "number" },
+                          "remoteWorkType": { "type": "number" },
+                          "link": {
+                            "type": "object",
+                            "properties": {
+                              "job": { "type": "string" },
+                              "cust": { "type": "string" }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "properties": {
+                        "pagination": {
+                          "type": "object",
+                          "properties": {
+                            "total": { "type": "number" },
+                            "currentPage": { "type": "number" },
+                            "lastPage": { "type": "number" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{code}": {
+      "get": {
+        "operationId": "getJobDetail",
+        "summary": "Get full details for a job listing",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "description": "Job short code from URL (e.g. '8tft1' from https://www.104.com.tw/job/8tft1)",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full job details including description, requirements, salary, and contact info",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/search-companies": {
+      "get": {
+        "operationId": "searchCompanies",
+        "summary": "Search companies on 104.com.tw",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "description": "Company name keyword (English or Chinese)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Page number (default 1)",
+            "schema": { "type": "integer", "minimum": 1 }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Results per page (default 10, max 50)",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Company listings with pagination",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/companies/{code}": {
+      "get": {
+        "operationId": "getCompanyDetail",
+        "summary": "Get full company profile from 104.com.tw",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "description": "Company short code (e.g. '1a2x6bmutz' from https://www.104.com.tw/company/1a2x6bmutz)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "includeJobs",
+            "in": "query",
+            "description": "Include current job listings (true/false)",
+            "schema": { "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full company profile including industry, size, benefits, and contact info",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

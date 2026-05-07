@@ -72,6 +72,50 @@ Add to Claude Desktop config:
 | `6001006000` | 台南市 |
 | `6001008000` | 高雄市 |
 
+## Compatible clients
+
+Works with any MCP-compatible AI client:
+
+| Client | Config file |
+|---|---|
+| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Cursor | `~/.cursor/mcp.json` |
+| Windsurf | `~/.codeium/windsurf/mcp_config.json` |
+| Cline (VS Code) | MCP Servers panel in sidebar |
+| Continue.dev | `~/.continue/config.json` → `mcpServers` |
+| Zed | `settings.json` → `context_servers` |
+
+All clients use the same config block:
+
+```json
+{
+  "mcpServers": {
+    "104": {
+      "command": "npx",
+      "args": ["-y", "104-mcp-server"]
+    }
+  }
+}
+```
+
+## ChatGPT / GPT Actions
+
+A REST API is deployed at `https://104-mcp.vercel.app` for use as a [GPT Action](https://platform.openai.com/docs/actions).
+
+**OpenAPI spec:** `https://104-mcp.vercel.app/openapi.json`
+
+To add to a Custom GPT:
+1. Go to [chat.openai.com/gpts](https://chat.openai.com/gpts) → Create
+2. Click **Configure** → **Add actions**
+3. Paste the OpenAPI spec URL above
+4. Save and test
+
+Available via GPT Actions (read-only, no auth required):
+- `searchJobs` — search job listings
+- `getJobDetail` — full job posting
+- `searchCompanies` — search companies
+- `getCompanyDetail` — company profile
+
 ## Notes
 
 - No API key needed for read-only tools
