@@ -1,0 +1,39 @@
+{
+  "name": "104-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for 104.com.tw job search platform",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "104-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "104",
+    "job-search",
+    "taiwan",
+    "claude"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "tough-cookie": "^4.1.4",
+    "undici": "^6.21.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/tough-cookie": "^4.0.5",
+    "typescript": "^5.6.0"
+  }
+}
