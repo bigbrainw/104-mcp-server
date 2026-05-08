@@ -18,6 +18,12 @@ MCP server for Taiwan's largest job platform — search jobs, browse companies, 
 | `save_job` | Yes | Bookmark a job |
 | `save_company` | Yes | Follow a company |
 
+## npm package name
+
+This repository publishes **`mcp-104jobs`** (see `package.json`). That is the package to install and the binary name for MCP clients.
+
+If you see **`104-mcp-server`** on npm as well, it is the same project published under an older alternate name. Prefer **`mcp-104jobs`**; the duplicate can be marked deprecated on npm by its owner (`npm deprecate 104-mcp-server@"*" "Use mcp-104jobs instead"`).
+
 ## Setup
 
 ### Via npx (recommended)

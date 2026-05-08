@@ -23,7 +23,7 @@ async function fetch104<T>(url: string, referer: string): Promise<T> {
 }
 
 function createServer() {
-  const server = new McpServer({ name: "104jobs", version: "1.0.0" });
+  const server = new McpServer({ name: "104jobs", version: "1.0.1" });
 
   server.tool(
     "search_jobs",

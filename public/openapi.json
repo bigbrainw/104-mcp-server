@@ -3,7 +3,7 @@
   "info": {
     "title": "104.com.tw Job Search API",
     "description": "Search jobs and companies on Taiwan's largest job platform (104.com.tw). Use this to find job listings, company profiles, and career opportunities in Taiwan.",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "servers": [
     {

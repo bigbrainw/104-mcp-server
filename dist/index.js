@@ -8,8 +8,8 @@ import { companyDetailSchema, getCompanyDetail } from "./tools/company-detail.js
 import { loginSchema, logoutSchema, login, logout } from "./tools/auth.js";
 import { applyJobSchema, saveJobSchema, saveCompanySchema, applyJob, saveJob, saveCompany, } from "./tools/apply.js";
 const server = new McpServer({
-    name: "104-mcp-server",
-    version: "1.0.0",
+    name: "mcp-104jobs",
+    version: "1.0.1",
 });
 const readOnlyAnnotations = {
     readOnlyHint: true,

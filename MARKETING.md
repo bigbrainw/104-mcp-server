@@ -91,7 +91,7 @@ GitHub: [your repo link]
 
 ## Notes
 
-- npm package already published: `mcp-104jobs@1.0.0`
+- npm package already published: `mcp-104jobs@1.0.1`
 - Add Traditional Chinese docs to README — target users are Taiwanese, Chinese description helps search
 - Add a badge to README after getting listed on mcp.so / Smithery
 - Threads API automation: need official API token from developers.facebook.com (not raw credentials)
