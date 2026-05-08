@@ -2,6 +2,8 @@
 
 MCP server for Taiwan's largest job platform — search jobs, browse companies, and apply, all from Claude.
 
+> **Disclaimer:** This project is not affiliated with or endorsed by 104 Human Resources Group (104人力銀行). Use in accordance with [104.com.tw's Terms of Service](https://www.104.com.tw/about/terms.html).
+
 ## Tools
 
 | Tool | Auth required | Description |

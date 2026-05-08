@@ -1,6 +1,6 @@
 import { CookieJar } from "tough-cookie";
 const BASE_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "User-Agent": "104-mcp-client/1.0 (https://github.com/bigbrainw/104-mcp-server)",
     Accept: "application/json, text/plain, */*",
     "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
 };
