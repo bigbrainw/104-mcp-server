@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0f766e"/>
+      <stop offset="0.62" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="64" y="64" width="1152" height="592" rx="28" fill="#ffffff" opacity="0.94"/>
+  <text x="120" y="150" fill="#0f172a" font-family="Arial, sans-serif" font-size="54" font-weight="700">Taiwan Jobs</text>
+  <text x="120" y="205" fill="#334155" font-family="Arial, sans-serif" font-size="28">Find jobs and company profiles from 104.com.tw in ChatGPT.</text>
+  <rect x="120" y="270" width="1040" height="86" rx="18" fill="#f1f5f9"/>
+  <text x="154" y="324" fill="#0f172a" font-family="Arial, sans-serif" font-size="30">Prompt: Search for backend engineer jobs in Taipei with remote options.</text>
+  <text x="120" y="430" fill="#0f172a" font-family="Arial, sans-serif" font-size="30" font-weight="700">Tool used</text>
+  <text x="120" y="480" fill="#334155" font-family="Arial, sans-serif" font-size="30">search_jobs</text>
+  <text x="120" y="560" fill="#0f172a" font-family="Arial, sans-serif" font-size="30" font-weight="700">Result</text>
+  <text x="120" y="610" fill="#334155" font-family="Arial, sans-serif" font-size="28">Matching job listings with title, company, salary, location, remote status, and source links.</text>
+</svg>

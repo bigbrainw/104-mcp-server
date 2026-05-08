@@ -1,0 +1,9 @@
+file '../public/demo-frames/demo-01.png'
+duration 3
+file '../public/demo-frames/demo-02.png'
+duration 3
+file '../public/demo-frames/demo-03.png'
+duration 3
+file '../public/demo-frames/demo-04.png'
+duration 3
+file '../public/demo-frames/demo-04.png'

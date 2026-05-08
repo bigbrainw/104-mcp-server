@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Taiwan Jobs icon</title>
+  <desc id="desc">A briefcase and Taiwan location pin icon for Taiwan Jobs.</desc>
+  <defs>
+    <linearGradient id="bg" x1="160" y1="120" x2="864" y2="904" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f766e"/>
+      <stop offset="0.56" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+    <linearGradient id="pin" x1="330" y1="245" x2="688" y2="820" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fef3c7"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="24" stdDeviation="32" flood-color="#111827" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="758" cy="190" r="106" fill="#ffffff" opacity="0.13"/>
+  <circle cx="200" cy="806" r="148" fill="#ffffff" opacity="0.10"/>
+  <path fill="#ffffff" opacity="0.16" d="M503 179c57 0 105 31 124 79 12 31 13 64 5 96l-23 89 70 101c17 24 20 55 8 82l-64 145c-16 36-53 58-92 54l-127-13c-30-3-57-19-74-44l-89-129c-14-20-20-45-16-69l40-253c7-42 40-75 82-83l75-14c26-28 45-41 81-41Z"/>
+  <g filter="url(#shadow)">
+    <path fill="url(#pin)" d="M512 170c-138 0-250 112-250 250 0 190 250 436 250 436s250-246 250-436c0-138-112-250-250-250Zm0 348a98 98 0 1 1 0-196 98 98 0 0 1 0 196Z"/>
+    <circle cx="512" cy="420" r="98" fill="#ffffff" opacity="0.94"/>
+    <path fill="#0f172a" d="M424 413c0-32 26-58 58-58h60c32 0 58 26 58 58v90c0 16-13 29-29 29H453c-16 0-29-13-29-29v-90Zm58-20c-11 0-20 9-20 20v10h100v-10c0-11-9-20-20-20h-60Zm-20 70v31h100v-31H462Z"/>
+    <rect x="495" y="448" width="34" height="34" rx="8" fill="#f59e0b"/>
+  </g>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720">
+  <rect width="1280" height="720" fill="#111827"/>
+  <rect x="64" y="64" width="1152" height="592" rx="28" fill="#ffffff"/>
+  <text x="120" y="145" fill="#0f172a" font-family="Arial, sans-serif" font-size="46" font-weight="700">Safety and Scope</text>
+  <text x="120" y="225" fill="#334155" font-family="Arial, sans-serif" font-size="30">The hosted ChatGPT app exposes four read-only tools.</text>
+  <text x="120" y="300" fill="#334155" font-family="Arial, sans-serif" font-size="30">It searches public 104.com.tw data and does not apply to jobs, save data,</text>
+  <text x="120" y="345" fill="#334155" font-family="Arial, sans-serif" font-size="30">purchase anything, or modify user accounts.</text>
+  <rect x="120" y="430" width="1040" height="92" rx="18" fill="#fef3c7"/>
+  <text x="154" y="487" fill="#92400e" font-family="Arial, sans-serif" font-size="30">Negative example: "Apply to this job for me" should not trigger a hosted tool.</text>
+  <text x="120" y="600" fill="#64748b" font-family="Arial, sans-serif" font-size="26">MCP endpoint: https://104-mcp.vercel.app/api/mcp</text>
+</svg>
