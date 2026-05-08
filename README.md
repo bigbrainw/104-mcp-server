@@ -29,7 +29,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "104": {
       "command": "npx",
-      "args": ["-y", "104-mcp-server"]
+      "args": ["-y", "mcp-104jobs"]
     }
   }
 }
@@ -94,7 +94,7 @@ All clients use the same config block:
   "mcpServers": {
     "104": {
       "command": "npx",
-      "args": ["-y", "104-mcp-server"]
+      "args": ["-y", "mcp-104jobs"]
     }
   }
 }

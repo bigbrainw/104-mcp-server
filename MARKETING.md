@@ -80,18 +80,18 @@ Install:
   "mcpServers": {
     "104": {
       "command": "npx",
-      "args": ["-y", "104-mcp-server"]
+      "args": ["-y", "mcp-104jobs"]
     }
   }
 }
 
-npm: https://www.npmjs.com/package/104-mcp-server
+npm: https://www.npmjs.com/package/mcp-104jobs
 GitHub: [your repo link]
 ```
 
 ## Notes
 
-- npm package already published: `104-mcp-server@1.0.0`
+- npm package already published: `mcp-104jobs@1.0.0`
 - Add Traditional Chinese docs to README — target users are Taiwanese, Chinese description helps search
 - Add a badge to README after getting listed on mcp.so / Smithery
 - Threads API automation: need official API token from developers.facebook.com (not raw credentials)

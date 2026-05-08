@@ -1,11 +1,11 @@
 {
-  "name": "104-mcp-server",
+  "name": "mcp-104jobs",
   "version": "1.0.0",
   "description": "MCP server for 104.com.tw job search platform",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "104-mcp": "dist/index.js"
+    "mcp-104jobs": "dist/index.js"
   },
   "files": [
     "dist"
