@@ -1,4 +1,4 @@
-export const config = { runtime: "edge" };
+import type { IncomingMessage, ServerResponse } from "node:http";
 
 const BASE_HEADERS = {
   "User-Agent": "104-mcp-client/1.0 (https://github.com/bigbrainw/104-mcp-server)",
@@ -7,18 +7,14 @@ const BASE_HEADERS = {
   Referer: "https://www.104.com.tw/company/search/",
 };
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
+  if (req.method === "OPTIONS") { res.end(); return; }
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
-
-  const url = new URL(request.url);
+  const url = new URL(req.url ?? "/", "https://host");
   const keyword = url.searchParams.get("keyword");
-  if (!keyword) return Response.json({ error: "keyword is required" }, { status: 400, headers: CORS });
+  if (!keyword) { res.statusCode = 400; res.end(JSON.stringify({ error: "keyword required" })); return; }
 
   const q = new URLSearchParams({
     keyword,
@@ -27,11 +23,12 @@ export default async function handler(request: Request): Promise<Response> {
   });
 
   try {
-    const res = await fetch(`https://www.104.com.tw/company/ajax/list?${q}`, { headers: BASE_HEADERS });
-    if (!res.ok) return Response.json({ error: `104 API error: ${res.status}` }, { status: res.status, headers: CORS });
-    const data = await res.json();
-    return Response.json(data, { headers: CORS });
+    const r = await fetch(`https://www.104.com.tw/company/ajax/list?${q}`, { headers: BASE_HEADERS });
+    const data = await r.json();
+    res.statusCode = r.status;
+    res.end(JSON.stringify(data));
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500, headers: CORS });
+    res.statusCode = 500;
+    res.end(JSON.stringify({ error: e.message }));
   }
 }

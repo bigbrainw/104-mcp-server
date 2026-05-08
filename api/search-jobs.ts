@@ -1,4 +1,4 @@
-export const config = { runtime: "edge" };
+import type { IncomingMessage, ServerResponse } from "node:http";
 
 const BASE_HEADERS = {
   "User-Agent": "104-mcp-client/1.0 (https://github.com/bigbrainw/104-mcp-server)",
@@ -7,31 +7,25 @@ const BASE_HEADERS = {
   Referer: "https://www.104.com.tw/jobs/search/",
 };
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-  "Content-Type": "application/json",
-};
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
+  if (req.method === "OPTIONS") { res.end(); return; }
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
-
-  const url = new URL(request.url);
-  const q = new URLSearchParams();
+  const url = new URL(req.url ?? "/", "https://host");
+  const q = new URLSearchParams({ asc: "0", jobsource: "2018indexpoc" });
   for (const key of ["keyword", "area", "ro", "order", "page", "edu", "remoteWork", "s9"]) {
     const v = url.searchParams.get(key);
     if (v) q.set(key, v);
   }
-  q.set("asc", "0");
-  q.set("jobsource", "2018indexpoc");
 
   try {
-    const res = await fetch(`https://www.104.com.tw/jobs/search/api/jobs?${q}`, { headers: BASE_HEADERS });
-    if (!res.ok) return new Response(JSON.stringify({ error: `104 API error: ${res.status}` }), { status: res.status, headers: CORS });
-    const data = await res.json();
-    return new Response(JSON.stringify(data), { headers: CORS });
+    const r = await fetch(`https://www.104.com.tw/jobs/search/api/jobs?${q}`, { headers: BASE_HEADERS });
+    const data = await r.json();
+    res.statusCode = r.status;
+    res.end(JSON.stringify(data));
   } catch (e: any) {
-    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: CORS });
+    res.statusCode = 500;
+    res.end(JSON.stringify({ error: e.message }));
   }
 }

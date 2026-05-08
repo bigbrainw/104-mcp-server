@@ -1,4 +1,4 @@
-export const config = { runtime: "edge" };
+import type { IncomingMessage, ServerResponse } from "node:http";
 
 const BASE_HEADERS = {
   "User-Agent": "104-mcp-client/1.0 (https://github.com/bigbrainw/104-mcp-server)",
@@ -6,27 +6,23 @@ const BASE_HEADERS = {
   "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
 };
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Content-Type", "application/json");
+  if (req.method === "OPTIONS") { res.end(); return; }
 
-export default async function handler(request: Request): Promise<Response> {
-  if (request.method === "OPTIONS") return new Response(null, { headers: CORS });
-
-  const url = new URL(request.url);
-  const code = url.pathname.split("/").pop();
-  if (!code) return Response.json({ error: "Missing job code" }, { status: 400, headers: CORS });
+  const code = (req.url ?? "").split("/").pop()?.split("?")[0];
+  if (!code) { res.statusCode = 400; res.end(JSON.stringify({ error: "Missing job code" })); return; }
 
   try {
-    const res = await fetch(`https://www.104.com.tw/job/ajax/content/${code}`, {
+    const r = await fetch(`https://www.104.com.tw/job/ajax/content/${code}`, {
       headers: { ...BASE_HEADERS, Referer: `https://www.104.com.tw/job/${code}` },
     });
-    if (!res.ok) return Response.json({ error: `104 API error: ${res.status}` }, { status: res.status, headers: CORS });
-    const data = await res.json();
-    return Response.json(data, { headers: CORS });
+    const data = await r.json();
+    res.statusCode = r.status;
+    res.end(JSON.stringify(data));
   } catch (e: any) {
-    return Response.json({ error: e.message }, { status: 500, headers: CORS });
+    res.statusCode = 500;
+    res.end(JSON.stringify({ error: e.message }));
   }
 }
