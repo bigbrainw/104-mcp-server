@@ -1,6 +1,14 @@
 {
   "rewrites": [
     {
+      "source": "/privacy",
+      "destination": "/api/privacy"
+    },
+    {
+      "source": "/terms",
+      "destination": "/api/terms"
+    },
+    {
       "source": "/.well-known/openai-apps-challenge",
       "destination": "/api/openai-apps-challenge"
     }
