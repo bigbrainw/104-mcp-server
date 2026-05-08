@@ -10,6 +10,12 @@ const BASE = {
   "Accept-Language": "zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7",
 };
 
+const readOnlyAnnotations = {
+  readOnlyHint: true,
+  openWorldHint: false,
+  destructiveHint: false,
+};
+
 async function fetch104<T>(url: string, referer: string): Promise<T> {
   const res = await fetch(url, { headers: { ...BASE, Referer: referer } });
   if (!res.ok) throw new Error(`104 API error: ${res.status}`);
@@ -31,6 +37,7 @@ function createServer() {
       s9: z.string().optional().describe("Experience: 1=應屆 2=1年以下 3=1-3年 4=3-5年 5=5-10年 6=10年以上"),
       page: z.number().int().min(1).optional().describe("Page number"),
     },
+    readOnlyAnnotations,
     async (params) => {
       const q = new URLSearchParams({ asc: "0", jobsource: "2018indexpoc" });
       if (params.keyword) q.set("keyword", params.keyword);
@@ -63,6 +70,7 @@ function createServer() {
     "get_job_detail",
     "Get full details for a job listing on 104.com.tw",
     { jobCode: z.string().describe("Job code e.g. '8tft1' from https://www.104.com.tw/job/8tft1") },
+    readOnlyAnnotations,
     async ({ jobCode }) => {
       const data = await fetch104<any>(
         `https://www.104.com.tw/job/ajax/content/${jobCode}`,
@@ -93,6 +101,7 @@ function createServer() {
       page: z.number().int().min(1).optional(),
       pageSize: z.number().int().min(1).max(50).optional(),
     },
+    readOnlyAnnotations,
     async (params) => {
       const q = new URLSearchParams({
         keyword: params.keyword,
@@ -120,6 +129,7 @@ function createServer() {
       companyCode: z.string().describe("Company code e.g. '1a2x6bmutz' from https://www.104.com.tw/company/1a2x6bmutz"),
       includeJobs: z.boolean().optional().describe("Include current job listings"),
     },
+    readOnlyAnnotations,
     async ({ companyCode, includeJobs }) => {
       const referer = `https://www.104.com.tw/company/${companyCode}`;
       const data = await fetch104<any>(`https://www.104.com.tw/api/companies/${companyCode}/content`, referer);

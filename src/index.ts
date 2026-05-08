@@ -24,6 +24,24 @@ const server = new McpServer({
   version: "1.0.0",
 });
 
+const readOnlyAnnotations = {
+  readOnlyHint: true,
+  openWorldHint: false,
+  destructiveHint: false,
+};
+
+const accountWriteAnnotations = {
+  readOnlyHint: false,
+  openWorldHint: false,
+  destructiveHint: false,
+};
+
+const applyJobAnnotations = {
+  readOnlyHint: false,
+  openWorldHint: true,
+  destructiveHint: false,
+};
+
 // ── Job Search ──────────────────────────────────────────────────────────────
 
 server.registerTool(
@@ -32,6 +50,7 @@ server.registerTool(
     description:
       "Search job listings on 104.com.tw. Returns a list of matching jobs with salary, location, and job codes.",
     inputSchema: searchJobsSchema,
+    annotations: readOnlyAnnotations,
   },
   async (params) => {
     const result = await searchJobs(params);
@@ -45,6 +64,7 @@ server.registerTool(
     description:
       "Get full details of a job posting on 104.com.tw including description, requirements, salary, welfare, and contact info.",
     inputSchema: jobDetailSchema,
+    annotations: readOnlyAnnotations,
   },
   async (params) => {
     const result = await getJobDetail(params);
@@ -60,6 +80,7 @@ server.registerTool(
     description:
       "Search companies on 104.com.tw by name. Returns company codes, industry, location, and open job count.",
     inputSchema: searchCompaniesSchema,
+    annotations: readOnlyAnnotations,
   },
   async (params) => {
     const result = await searchCompanies(params);
@@ -73,6 +94,7 @@ server.registerTool(
     description:
       "Get full company profile from 104.com.tw including about, products, benefits, and optionally current job listings.",
     inputSchema: companyDetailSchema,
+    annotations: readOnlyAnnotations,
   },
   async (params) => {
     const result = await getCompanyDetail(params);
@@ -88,6 +110,7 @@ server.registerTool(
     description:
       "Log in to your 104.com.tw account. Required for applying to jobs, saving jobs/companies.",
     inputSchema: loginSchema,
+    annotations: accountWriteAnnotations,
   },
   async (params) => {
     const result = await login(params);
@@ -100,6 +123,7 @@ server.registerTool(
   {
     description: "Log out of your 104.com.tw account.",
     inputSchema: logoutSchema,
+    annotations: accountWriteAnnotations,
   },
   async (params) => {
     const result = await logout(params);
@@ -115,6 +139,7 @@ server.registerTool(
     description:
       "Apply to a job on 104.com.tw. Requires being logged in. Optionally include a cover letter.",
     inputSchema: applyJobSchema,
+    annotations: applyJobAnnotations,
   },
   async (params) => {
     const result = await applyJob(params);
@@ -127,6 +152,7 @@ server.registerTool(
   {
     description: "Bookmark/save a job posting. Requires being logged in.",
     inputSchema: saveJobSchema,
+    annotations: accountWriteAnnotations,
   },
   async (params) => {
     const result = await saveJob(params);
@@ -139,6 +165,7 @@ server.registerTool(
   {
     description: "Follow a company on 104.com.tw. Requires being logged in.",
     inputSchema: saveCompanySchema,
+    annotations: accountWriteAnnotations,
   },
   async (params) => {
     const result = await saveCompany(params);
