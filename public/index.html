@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>104 Jobs MCP</title>
+    <title>104 Jobs MCP — 用對話搜尋 104 職缺</title>
     <meta
       name="description"
-      content="Search Taiwan jobs and companies from ChatGPT, Claude, Cursor, and any MCP-compatible client."
+      content="少開分頁、先篩遠端與年資，再連回 104 官方職缺細節。支援 ChatGPT、Claude、Cursor 與 MCP。"
     />
     <link
       rel="icon"
@@ -437,6 +437,61 @@
         color: var(--text);
       }
 
+      .subzh {
+        margin: 0 0 18px;
+        max-width: 640px;
+        color: #cfe6f7;
+        font-size: 17px;
+        line-height: 1.65;
+        font-weight: 500;
+      }
+
+      .trust-note {
+        margin-top: 22px;
+        border-left: 3px solid var(--brand);
+        padding: 12px 14px;
+        max-width: 640px;
+        background: rgba(77, 216, 255, 0.06);
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .prompts-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .prompts-list li {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 14px 16px;
+        background: rgba(4, 10, 16, 0.65);
+        color: #d9f9ff;
+        font-size: 14px;
+        line-height: 1.55;
+      }
+
+      .prompts-list li::before {
+        content: "「";
+        color: var(--muted);
+      }
+
+      .prompts-list li::after {
+        content: "」";
+        color: var(--muted);
+      }
+
+      .prompts-footnote {
+        margin-top: 14px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.55;
+      }
+
       @media (max-width: 860px) {
         .hero,
         .install {
@@ -483,6 +538,7 @@
       </a>
       <nav class="nav-links" aria-label="Primary navigation">
         <a href="#tools">Tools</a>
+        <a href="#prompts">Example prompts</a>
         <a href="#install">Install</a>
         <a href="/openapi.json">OpenAPI</a>
         <a class="button primary" href="#demo">Try search</a>
@@ -492,11 +548,17 @@
     <main>
       <section class="shell hero">
         <div>
-          <span class="eyebrow"><span class="dot"></span> Taiwan job search for AI agents</span>
+          <span class="eyebrow"><span class="dot"></span> Less tab fatigue · Official 104 links</span>
           <h1>Bring 104.com.tw jobs into ChatGPT, Claude, and Cursor.</h1>
+          <p class="subzh">
+            找工作最常講的是：職缺真假難辨、投履已讀不回、想先弄清遠端／薪水再決定要不要投。這裡用對話<strong>篩條件、展開職缺與公司資訊</strong>，每一步都<strong>連回 104 官方頁面</strong>核對，不必只靠來路不明的徵才貼文。
+          </p>
           <p class="lead">
-            Search jobs, inspect company profiles, filter by remote work, and review role requirements from Taiwan's largest
-            job platform without leaving your assistant.
+            Filter by remote work, location, experience, and education; pull full postings and employer profiles; stay inside
+            your assistant until you open the official listing.
+          </p>
+          <p class="trust-note">
+            We surface data from public 104 listings only. Always verify the company name and apply through the official job URL—never pay upfront fees to strangers.
           </p>
           <div class="hero-actions">
             <a class="button primary" href="#install">Install with npx</a>
@@ -505,16 +567,16 @@
           </div>
           <div class="stats" aria-label="Highlights">
             <div class="stat">
-              <strong>4 read APIs</strong>
-              <span>Jobs, job detail, companies, company detail</span>
+              <strong>官方連結</strong>
+              <span>每筆職缺回到 104 頁面自行應徵與核對</span>
             </div>
             <div class="stat">
-              <strong>Remote filters</strong>
-              <span>Search partial or full remote roles</span>
+              <strong>遠端 · 年資 · 地區</strong>
+              <span>一次篩掉不符合條件的刊登，少開無效分頁</span>
             </div>
             <div class="stat">
-              <strong>No API key</strong>
-              <span>Read-only usage works out of the box</span>
+              <strong>Read-only · 免金鑰</strong>
+              <span>search_jobs / get_job_detail / company APIs</span>
             </div>
           </div>
         </div>
@@ -528,27 +590,27 @@
             <div class="tool-card">
               <strong>search_jobs</strong>
               <pre>{
-  "keyword": "backend engineer",
+  "keyword": "客服",
   "area": "6001001000",
   "remoteWork": 2,
-  "s9": "3"
+  "s9": "1,2"
 }</pre>
             </div>
             <div class="result">
               <span class="result-logo">B</span>
               <div>
-                <h3>Backend Engineer</h3>
-                <p>Taipei City · Remote · 1-3 years</p>
+                <h3>後端工程師</h3>
+                <p>台北市 · 全遠端 · 1–3 年</p>
               </div>
-              <span class="salary">NT$1.0M+</span>
+              <span class="salary">薪資面議</span>
             </div>
             <div class="result">
-              <span class="result-logo">AI</span>
+              <span class="result-logo">CS</span>
               <div>
-                <h3>Customer Support Engineer</h3>
-                <p>Taipei City · Full remote · Junior</p>
+                <h3>技術客服／Customer Support</h3>
+                <p>新北市 · 全遠端 · 新人可</p>
               </div>
-              <span class="salary">NT$45K+</span>
+              <span class="salary">月薪 4 萬↑</span>
             </div>
           </div>
         </div>
@@ -556,23 +618,52 @@
 
       <section id="tools" class="shell">
         <div class="section-heading">
-          <h2>Built for job search workflows.</h2>
-          <p>Use natural language to move from a broad search to specific openings, salary ranges, requirements, and employer context.</p>
+          <h2>Built for how people actually search.</h2>
+          <p>
+            From “too many tabs” to “is this remote real?”—narrow listings first, then open the full JD and company page when
+            it is worth your time.
+          </p>
         </div>
         <div class="grid">
           <article class="card">
             <h3>Search jobs</h3>
-            <p>Find listings by keyword, city code, education level, experience band, part-time status, and remote work type.</p>
+            <p>
+              Cut noise with keyword, area, remote (partial or full), experience, education, and full-time vs part-time—before
+              you land on a dozen similar postings.
+            </p>
           </article>
           <article class="card">
             <h3>Read job detail</h3>
-            <p>Open the full posting with salary, location, remote policy, requirements, description, welfare, and application URL.</p>
+            <p>
+              Pull salary line, real remote wording, requirements, and welfare from the official posting so you are not guessing
+              from a cropped screenshot.
+            </p>
           </article>
           <article class="card">
             <h3>Explore companies</h3>
-            <p>Search employers and inspect company profiles, industries, size, benefits, and current openings.</p>
+            <p>Look up industry, scale, and benefits on the company profile before you spend an application on a bad fit.</p>
           </article>
         </div>
+      </section>
+
+      <section id="prompts" class="shell">
+        <div class="section-heading">
+          <h2>Example prompts (Traditional Chinese)</h2>
+          <p>
+            Phrases in the spirit of Dcard / Threads job threads: remote-first, compare roles, sanity-check before applying.
+            Paste into ChatGPT or Claude with this MCP connected.
+          </p>
+        </div>
+        <ul class="prompts-list">
+          <li>幫我找台北市全遠端的客服或技術支援職缺，要有薪水區間，並給我 104 官方應徵連結。</li>
+          <li>新竹軟體工程師、可部分遠端或全遠端，排除主管職，列出前五筆跟工作內容摘要。</li>
+          <li>這幾個職缺代碼條件差在哪？遠規定跟休假誰比較清楚？（請用 get_job_detail）</li>
+          <li>這間公司在 104 上的產業別、員工規模、福利怎麼寫？最近還有哪些缺？</li>
+          <li>想找「不用寫程式」的遠端行政或客服，應屆可，幫我篩一輪再說明為什麼值得點進去看。</li>
+        </ul>
+        <p class="prompts-footnote">
+          If you collect real thread titles from Dcard or Threads, reuse their wording here—the closer to how people ask, the better the assistant responds.
+        </p>
       </section>
 
       <section id="demo" class="shell">
@@ -582,7 +673,7 @@
         </div>
         <div class="search-panel">
           <form class="search-form" id="search-form">
-            <input id="keyword" name="keyword" value="tech support" aria-label="Job keyword" />
+            <input id="keyword" name="keyword" value="客服" aria-label="Job keyword" />
             <button type="submit">Search jobs</button>
           </form>
           <div class="search-options">
@@ -661,7 +752,7 @@
         results.innerHTML = "<small>Searching 104.com.tw...</small>";
 
         const query = new URLSearchParams({
-          keyword: document.querySelector("#keyword").value.trim() || "tech support",
+          keyword: document.querySelector("#keyword").value.trim() || "客服",
           order: "1",
         });
         const remoteWork = document.querySelector("#remoteWork").value;
