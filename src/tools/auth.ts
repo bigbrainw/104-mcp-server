@@ -12,7 +12,9 @@ export const logoutSchema = z.object({});
 interface OidcConfig {
   authorization_endpoint: string;
   token_endpoint: string;
-  userinfo_endpoint: string;
+  userinfo_endpoint?: string;
+  revocation_endpoint?: string;
+  scopes_supported?: string[];
 }
 
 interface TokenResponse {
@@ -21,6 +23,10 @@ interface TokenResponse {
   refresh_token?: string;
   token_type: string;
   expires_in: number;
+}
+
+interface OAuthErrorResponse {
+  error?: string;
 }
 
 interface UserInfo {
@@ -37,11 +43,102 @@ function generateCodeChallenge(verifier: string): string {
   return crypto.createHash("sha256").update(verifier).digest("base64url");
 }
 
+const OIDC_DISCOVERY_URL = "https://oidc.104.com.tw/.well-known/openid-configuration";
+const OIDC_CLIENT_ID = "my104";
+const OIDC_REDIRECT_URI = "https://login.104.com.tw/callback";
+const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
+
 async function getOidcConfig(): Promise<OidcConfig> {
-  const res = await fetch(
-    "https://oidc.104.com.tw/.well-known/openid-configuration"
+  const res = await client.request(OIDC_DISCOVERY_URL, { method: "GET" });
+  if (!res.ok) throw new Error(`OIDC discovery failed: ${res.status}`);
+  const config = (await res.json()) as OidcConfig;
+  if (!config.authorization_endpoint || !config.token_endpoint) {
+    throw new Error("OIDC discovery response is missing required endpoints.");
+  }
+  return config;
+}
+
+function getScopes(config: OidcConfig): string {
+  const supported = new Set(config.scopes_supported ?? []);
+  if (supported.size > 0 && !supported.has("openid")) {
+    throw new Error("OIDC discovery does not advertise the required openid scope.");
+  }
+  // Discovery advertises offline_access globally, but 104's public `my104`
+  // client currently rejects it, as well as profile and email. Preserve a
+  // refresh token if one is returned, but do not request an invalid scope.
+  return "openid";
+}
+
+function hasMatchingState(received: string | null, expected: string): boolean {
+  if (!received) return false;
+  const receivedBuffer = Buffer.from(received);
+  const expectedBuffer = Buffer.from(expected);
+  return (
+    receivedBuffer.length === expectedBuffer.length &&
+    crypto.timingSafeEqual(receivedBuffer, expectedBuffer)
   );
-  return res.json() as Promise<OidcConfig>;
+}
+
+function storeTokens(tokens: TokenResponse): void {
+  client.setTokens({
+    accessToken: tokens.access_token,
+    refreshToken: tokens.refresh_token,
+    expiresIn: tokens.expires_in,
+  });
+}
+
+async function isInvalidRefreshTokenResponse(res: Response): Promise<boolean> {
+  if (res.status !== 400 && res.status !== 401) return false;
+  const body = (await res.json().catch(() => null)) as OAuthErrorResponse | null;
+  return body?.error === "invalid_grant" || body?.error === "invalid_token";
+}
+
+export async function ensureAuthenticated(): Promise<boolean> {
+  if (!client.isLoggedIn()) return false;
+  if (!client.isAccessTokenExpired()) return true;
+
+  const refreshToken = client.getRefreshToken();
+  if (!refreshToken) {
+    await client.clearSession();
+    return false;
+  }
+
+  let res: Response;
+  try {
+    const config = await getOidcConfig();
+    res = await client.rawRequest(config.token_endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: OIDC_CLIENT_ID,
+      }).toString(),
+    });
+  } catch (err) {
+    throw new Error(
+      `Token refresh temporarily failed; please retry. ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  if (!res.ok) {
+    if (await isInvalidRefreshTokenResponse(res)) {
+      await client.clearSession();
+      return false;
+    }
+    throw new Error(`Token refresh failed with HTTP ${res.status}; please retry.`);
+  }
+
+  try {
+    const tokens = (await res.json()) as TokenResponse;
+    storeTokens({ ...tokens, refresh_token: tokens.refresh_token ?? refreshToken });
+    return true;
+  } catch (err) {
+    throw new Error(
+      `Token refresh temporarily failed; please retry. ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
 }
 
 export async function login(
@@ -52,6 +149,7 @@ export async function login(
   }
 
   try {
+    const config = await getOidcConfig();
     const verifier = generateCodeVerifier();
     const challenge = generateCodeChallenge(verifier);
     const state = crypto.randomBytes(16).toString("hex");
@@ -59,22 +157,21 @@ export async function login(
     // Step 1: Get login challenge from 104's auth flow
     const authParams = new URLSearchParams({
       response_type: "code",
-      client_id: "my104",
-      redirect_uri: "https://login.104.com.tw/callback",
-      scope: "openid profile email",
+      client_id: OIDC_CLIENT_ID,
+      redirect_uri: OIDC_REDIRECT_URI,
+      scope: getScopes(config),
       code_challenge: challenge,
       code_challenge_method: "S256",
       state,
     });
 
-    const authRes = await fetch(
-      `https://oidc.104.com.tw/oauth2/auth?${authParams}`,
+    const authRes = await client.request(
+      `${config.authorization_endpoint}?${authParams}`,
       {
         method: "GET",
         redirect: "manual",
         headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          "User-Agent": BROWSER_USER_AGENT,
         },
       }
     );
@@ -91,15 +188,14 @@ export async function login(
     }
 
     // Step 2: Submit credentials to signin API
-    const signinRes = await fetch(
+    const signinRes = await client.request(
       `https://api.signin.104.com.tw/oidc/login`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Referer: "https://signin.104.com.tw/",
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          "User-Agent": BROWSER_USER_AGENT,
         },
         body: JSON.stringify({
           email: params.email,
@@ -128,24 +224,33 @@ export async function login(
     }
 
     // Follow the redirect to get the code
-    const codeRes = await fetch(redirectTo, {
+    const codeRes = await client.request(redirectTo, {
       redirect: "manual",
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        "User-Agent": BROWSER_USER_AGENT,
       },
     });
 
     const callbackLocation = codeRes.headers.get("location") ?? "";
     const callbackUrl = new URL(callbackLocation, "https://login.104.com.tw");
     const code = callbackUrl.searchParams.get("code");
+    if (!hasMatchingState(callbackUrl.searchParams.get("state"), state)) {
+      return "Login failed: OAuth state validation failed.";
+    }
+    const oauthError = callbackUrl.searchParams.get("error");
+    if (oauthError) {
+      const description = callbackUrl.searchParams.get("error_description");
+      throw new Error(
+        `OAuth authorization failed: ${oauthError}${description ? ` (${description})` : ""}`
+      );
+    }
 
     if (!code) {
       return "Login failed: Could not extract authorization code.";
     }
 
     // Step 4: Exchange code for tokens
-    const tokenRes = await fetch("https://oidc.104.com.tw/oauth2/token", {
+    const tokenRes = await client.rawRequest(config.token_endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -153,8 +258,8 @@ export async function login(
       body: new URLSearchParams({
         grant_type: "authorization_code",
         code,
-        redirect_uri: "https://login.104.com.tw/callback",
-        client_id: "my104",
+        redirect_uri: OIDC_REDIRECT_URI,
+        client_id: OIDC_CLIENT_ID,
         code_verifier: verifier,
       }).toString(),
     });
@@ -164,16 +269,16 @@ export async function login(
     }
 
     const tokens = (await tokenRes.json()) as TokenResponse;
-    client.setAccessToken(tokens.access_token);
+    storeTokens(tokens);
 
     // Step 5: Get user info
-    const userRes = await fetch("https://oidc.104.com.tw/userinfo", {
-      headers: {
-        Authorization: `Bearer ${tokens.access_token}`,
-      },
-    });
+    const userRes = config.userinfo_endpoint
+      ? await client.request(config.userinfo_endpoint, {
+          headers: { Authorization: `Bearer ${tokens.access_token}` },
+        })
+      : undefined;
 
-    if (userRes.ok) {
+    if (userRes?.ok) {
       const userInfo = (await userRes.json()) as UserInfo;
       return `Logged in successfully as ${userInfo.email ?? userInfo.sub}`;
     }
@@ -191,6 +296,25 @@ export async function logout(
     return "Not currently logged in.";
   }
   // Clear token by creating a new client state — access token is cleared
-  client.setAccessToken("");
+  const accessToken = client.getAccessToken();
+  const refreshToken = client.getRefreshToken();
+
+  try {
+    const config = await getOidcConfig();
+    if (config.revocation_endpoint) {
+      for (const token of [refreshToken, accessToken]) {
+        if (!token) continue;
+        await client.rawRequest(config.revocation_endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ token, client_id: OIDC_CLIENT_ID }).toString(),
+        });
+      }
+    }
+  } catch {
+    // Local logout must still succeed when the revocation endpoint is unavailable.
+  } finally {
+    await client.clearSession();
+  }
   return "Logged out successfully.";
 }

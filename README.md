@@ -127,5 +127,7 @@ Available via GPT Actions (read-only, no auth required):
 ## Notes
 
 - No API key needed for read-only tools
-- Auth uses 104's OIDC flow (Ory Hydra with PKCE)
+- Auth uses 104's OIDC discovery flow (Ory Hydra with PKCE). Tokens and cookies
+  are held only in memory for the lifetime of the local MCP process; expiring
+  access tokens are refreshed when 104 issues a refresh token.
 - Apply/save require a valid 104.com.tw account
