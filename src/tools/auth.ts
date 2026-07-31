@@ -96,7 +96,7 @@ export async function ensureAuthenticated(): Promise<boolean> {
 
   try {
     const config = await getOidcConfig();
-    const res = await client.request(config.token_endpoint, {
+    const res = await client.rawRequest(config.token_endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
@@ -212,13 +212,20 @@ export async function login(
     if (!hasMatchingState(callbackUrl.searchParams.get("state"), state)) {
       return "Login failed: OAuth state validation failed.";
     }
+    const oauthError = callbackUrl.searchParams.get("error");
+    if (oauthError) {
+      const description = callbackUrl.searchParams.get("error_description");
+      throw new Error(
+        `OAuth authorization failed: ${oauthError}${description ? ` (${description})` : ""}`
+      );
+    }
 
     if (!code) {
       return "Login failed: Could not extract authorization code.";
     }
 
     // Step 4: Exchange code for tokens
-    const tokenRes = await client.request(config.token_endpoint, {
+    const tokenRes = await client.rawRequest(config.token_endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -272,7 +279,7 @@ export async function logout(
     if (config.revocation_endpoint) {
       for (const token of [refreshToken, accessToken]) {
         if (!token) continue;
-        await client.request(config.revocation_endpoint, {
+        await client.rawRequest(config.revocation_endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({ token, client_id: OIDC_CLIENT_ID }).toString(),

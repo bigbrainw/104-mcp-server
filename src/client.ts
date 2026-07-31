@@ -29,7 +29,7 @@ export class Client104 {
     }
   }
 
-  async request(
+  async rawRequest(
     url: string,
     options: {
       method?: string;
@@ -44,9 +44,6 @@ export class Client104 {
       ...BASE_HEADERS,
       ...(options.referer ? { Referer: options.referer } : {}),
       ...(cookieHeader ? { Cookie: cookieHeader } : {}),
-      ...(this.accessToken
-        ? { Authorization: `Bearer ${this.accessToken}` }
-        : {}),
       ...(options.headers ?? {}),
     };
 
@@ -63,6 +60,27 @@ export class Client104 {
     }
 
     return res;
+  }
+
+  async request(
+    url: string,
+    options: {
+      method?: string;
+      body?: BodyInit;
+      referer?: string;
+      headers?: Record<string, string>;
+      redirect?: RequestRedirect;
+    }
+  ): Promise<Response> {
+    return this.rawRequest(url, {
+      ...options,
+      headers: {
+        ...(this.accessToken
+          ? { Authorization: `Bearer ${this.accessToken}` }
+          : {}),
+        ...(options.headers ?? {}),
+      },
+    });
   }
 
   async fetch<T>(
