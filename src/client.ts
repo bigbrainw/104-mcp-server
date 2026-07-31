@@ -9,6 +9,8 @@ const BASE_HEADERS = {
 export class Client104 {
   private cookieJar: CookieJar;
   private accessToken?: string;
+  private refreshToken?: string;
+  private accessTokenExpiresAt?: number;
 
   constructor() {
     this.cookieJar = new CookieJar();
@@ -27,19 +29,20 @@ export class Client104 {
     }
   }
 
-  async fetch<T>(
+  async request(
     url: string,
     options: {
       method?: string;
-      body?: unknown;
-      referer: string;
+      body?: BodyInit;
+      referer?: string;
       headers?: Record<string, string>;
+      redirect?: RequestRedirect;
     }
-  ): Promise<T> {
+  ): Promise<Response> {
     const cookieHeader = await this.getCookieHeader(url);
     const headers: Record<string, string> = {
       ...BASE_HEADERS,
-      Referer: options.referer,
+      ...(options.referer ? { Referer: options.referer } : {}),
       ...(cookieHeader ? { Cookie: cookieHeader } : {}),
       ...(this.accessToken
         ? { Authorization: `Bearer ${this.accessToken}` }
@@ -47,20 +50,42 @@ export class Client104 {
       ...(options.headers ?? {}),
     };
 
-    if (options.body) {
-      headers["Content-Type"] = "application/json";
-    }
-
     const res = await fetch(url, {
       method: options.method ?? "GET",
       headers,
-      body: options.body ? JSON.stringify(options.body) : undefined,
+      body: options.body,
+      redirect: options.redirect,
     });
 
     const setCookies = res.headers.getSetCookie?.() ?? [];
     if (setCookies.length > 0) {
       await this.setCookiesFromResponse(url, setCookies);
     }
+
+    return res;
+  }
+
+  async fetch<T>(
+    url: string,
+    options: {
+      method?: string;
+      body?: unknown;
+      referer?: string;
+      headers?: Record<string, string>;
+    }
+  ): Promise<T> {
+    const headers = { ...(options.headers ?? {}) };
+    const body = options.body === undefined ? undefined : JSON.stringify(options.body);
+    if (body !== undefined && !headers["Content-Type"]) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    const res = await this.request(url, {
+      method: options.method,
+      body,
+      referer: options.referer,
+      headers,
+    });
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
@@ -70,12 +95,32 @@ export class Client104 {
     return res.json() as Promise<T>;
   }
 
+  setTokens(tokens: {
+    accessToken: string;
+    refreshToken?: string;
+    expiresIn?: number;
+  }): void {
+    this.accessToken = tokens.accessToken;
+    this.refreshToken = tokens.refreshToken;
+    this.accessTokenExpiresAt = tokens.expiresIn
+      ? Date.now() + tokens.expiresIn * 1000
+      : undefined;
+  }
+
   setAccessToken(token: string): void {
-    this.accessToken = token;
+    this.setTokens({ accessToken: token });
   }
 
   getAccessToken(): string | undefined {
     return this.accessToken;
+  }
+
+  getRefreshToken(): string | undefined {
+    return this.refreshToken;
+  }
+
+  isAccessTokenExpired(): boolean {
+    return !!this.accessTokenExpiresAt && Date.now() >= this.accessTokenExpiresAt - 30_000;
   }
 
   async getCookies(domain: string): Promise<string> {
@@ -84,6 +129,13 @@ export class Client104 {
 
   isLoggedIn(): boolean {
     return !!this.accessToken;
+  }
+
+  async clearSession(): Promise<void> {
+    this.accessToken = undefined;
+    this.refreshToken = undefined;
+    this.accessTokenExpiresAt = undefined;
+    await this.cookieJar.removeAllCookies();
   }
 }
 

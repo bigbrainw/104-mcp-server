@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { client } from "../client.js";
+import { ensureAuthenticated } from "./auth.js";
 
 export const applyJobSchema = z.object({
   jobCode: z
@@ -34,8 +35,8 @@ interface JobMetaResponse {
 export async function applyJob(
   params: z.infer<typeof applyJobSchema>
 ): Promise<string> {
-  if (!client.isLoggedIn()) {
-    return "Not logged in. Use login tool first.";
+  if (!(await ensureAuthenticated())) {
+    return "Not logged in or session expired. Use login tool first.";
   }
 
   const { jobCode, coverLetter } = params;
@@ -84,8 +85,8 @@ export async function applyJob(
 export async function saveJob(
   params: z.infer<typeof saveJobSchema>
 ): Promise<string> {
-  if (!client.isLoggedIn()) {
-    return "Not logged in. Use login tool first.";
+  if (!(await ensureAuthenticated())) {
+    return "Not logged in or session expired. Use login tool first.";
   }
 
   const url = `https://www.104.com.tw/job/ajax/save/${params.jobCode}`;
@@ -104,8 +105,8 @@ export async function saveJob(
 export async function saveCompany(
   params: z.infer<typeof saveCompanySchema>
 ): Promise<string> {
-  if (!client.isLoggedIn()) {
-    return "Not logged in. Use login tool first.";
+  if (!(await ensureAuthenticated())) {
+    return "Not logged in or session expired. Use login tool first.";
   }
 
   const url = `https://www.104.com.tw/api/companies/${params.companyCode}/follow`;
