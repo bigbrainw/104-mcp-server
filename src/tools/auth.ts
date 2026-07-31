@@ -25,6 +25,10 @@ interface TokenResponse {
   expires_in: number;
 }
 
+interface OAuthErrorResponse {
+  error?: string;
+}
+
 interface UserInfo {
   sub: string;
   email?: string;
@@ -84,6 +88,12 @@ function storeTokens(tokens: TokenResponse): void {
   });
 }
 
+async function isInvalidRefreshTokenResponse(res: Response): Promise<boolean> {
+  if (res.status !== 400 && res.status !== 401) return false;
+  const body = (await res.json().catch(() => null)) as OAuthErrorResponse | null;
+  return body?.error === "invalid_grant" || body?.error === "invalid_token";
+}
+
 export async function ensureAuthenticated(): Promise<boolean> {
   if (!client.isLoggedIn()) return false;
   if (!client.isAccessTokenExpired()) return true;
@@ -94,9 +104,10 @@ export async function ensureAuthenticated(): Promise<boolean> {
     return false;
   }
 
+  let res: Response;
   try {
     const config = await getOidcConfig();
-    const res = await client.rawRequest(config.token_endpoint, {
+    res = await client.rawRequest(config.token_endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
@@ -105,14 +116,28 @@ export async function ensureAuthenticated(): Promise<boolean> {
         client_id: OIDC_CLIENT_ID,
       }).toString(),
     });
-    if (!res.ok) throw new Error(`Token refresh failed: ${res.status}`);
+  } catch (err) {
+    throw new Error(
+      `Token refresh temporarily failed; please retry. ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
 
+  if (!res.ok) {
+    if (await isInvalidRefreshTokenResponse(res)) {
+      await client.clearSession();
+      return false;
+    }
+    throw new Error(`Token refresh failed with HTTP ${res.status}; please retry.`);
+  }
+
+  try {
     const tokens = (await res.json()) as TokenResponse;
     storeTokens({ ...tokens, refresh_token: tokens.refresh_token ?? refreshToken });
     return true;
-  } catch {
-    await client.clearSession();
-    return false;
+  } catch (err) {
+    throw new Error(
+      `Token refresh temporarily failed; please retry. ${err instanceof Error ? err.message : String(err)}`
+    );
   }
 }
 
